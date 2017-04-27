@@ -1,17 +1,19 @@
 canvas {
+	vertical-align: top;
 	border: 1px solid grey;
     padding-left: 0;
     padding-right: 0;
-    margin: 5% 35%;
-    display: block;
+    margin: auto;
+    display: inline-block;
 }
 
 .controls {
+	display: inline-block;
+	margin: 5%;
 	border: 1px solid gainsboro;
 	padding: 16px;
-	float: left;
-	margin-left: 10%;
 	text-align: right;
+	font-size: 10px;
 }
 
 .controls button {

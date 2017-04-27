@@ -101,8 +101,8 @@ ctx = canvas.getContext("2d");
 $genButton = document.querySelector('.generate');
 $clearButton = document.querySelector('.clear')
 
-templatePrey = { type: "prey", lifespan: 600, speed: 1, size: 4, genes: "Sf" };
-populate(50, templatePrey);
+templatePrey = { type: "prey", lifespan: 1000, speed: 1, size: 4, genes: "Sf" };
+populate(60, templatePrey);
 
 $genButton.onclick = function(){
 	size = parseInt( document.querySelector('.size').value );
