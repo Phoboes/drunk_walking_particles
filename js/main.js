@@ -1,5 +1,6 @@
 var topBoundary = 0;
 var bottomBoundary = 400;
+var cells = new Set();
 var canvas, ctx, $button, size, particleCount, lifespan;
 
 var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
@@ -14,13 +15,13 @@ var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 		color: color
 	};
 	// debugger
-	modelRun( model );
-	// return model
+	// modelRun( model );
+	return model
 };
 
 var modelRun = function( model ){
 		// console.log("run")
-		var lifeTime = setInterval(function(){
+		// var lifeTime = setInterval(function(){
 			// console.log("Tick.")
 		if( model.lifespan > 0 ){
 			if( !document.querySelector('.trail').checked ){
@@ -31,10 +32,10 @@ var modelRun = function( model ){
 		} else {
 			// console.log("Hit.")
 			// clearPreviousIndex( model, ctx );
-			clearInterval( lifeTime );
+			// clearInterval( lifeTime );
 			model = {};
 		}
-	}, 1)
+	// }, 1)
 }
 
 var clearPreviousIndex = function( model, context ){
@@ -59,11 +60,11 @@ var getRange = function( num, range ){
 	return returnVal;
 };
 
-var step = function( model ){
-	model.X = getRange(model.X, model.size);
-	model.Y = getRange(model.Y, model.size);
-	return model;
-}
+// var step = function( model ){
+// 	model.X = getRange(model.X, model.size);
+// 	model.Y = getRange(model.Y, model.size);
+// 	return model;
+// }
 
 var populate = function(num, template){
 	for( var i = 0; i < num; i++ ){
@@ -71,7 +72,7 @@ var populate = function(num, template){
 		template.Y = getRange( 0, bottomBoundary );
 		// template.lifespan = 1000
 		template.color = getRandomColor();
-		makeModel(  
+		c = makeModel(  
 				template.type, 
 				template.lifespan,
 				template.speed,
@@ -81,6 +82,7 @@ var populate = function(num, template){
 				template.genbes,
 				template.color
 			);
+		cells.add( c );
 	}
 }
 
@@ -91,6 +93,24 @@ function getRandomColor() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
+}
+
+var lifeCycle = function(){
+	cells.forEach( function( model ){
+		// cells.delete(item)
+		// debugger
+		model.lifespan -= 1;
+
+		if( !document.querySelector('.trail').checked ){
+			clearPreviousIndex( model, ctx )
+		}
+	
+		//Step
+		model.X = getRange(model.X, model.size);
+		model.Y = getRange(model.Y, model.size);
+		model.lifespan > 0 ? drawModel( model, ctx ) : cells.delete( model );
+	});
+	window.requestAnimationFrame( lifeCycle );
 }
 
 window.onload = function(){
@@ -114,7 +134,19 @@ $genButton.onclick = function(){
 
 $clearButton.onclick = function(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
 }
+
+
+window.requestAnimationFrame(function(){
+	lifeCycle();
+	console.log("tick")
+});
+
+
+
+// debugger
 
 // r2 = makeModel( "prey", 9000, 1, 4, 100, 300, "Sf", "blue" );
 // r3 = makeModel( "prey", 9000, 1, 4, 300, 100, "Sf", "yellow" );
