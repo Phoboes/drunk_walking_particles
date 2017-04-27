@@ -1,9 +1,6 @@
 var topBoundary = 0;
 var bottomBoundary = 400;
-var ctx;
-var canvas;
-var cells = [];
-
+var canvas, ctx, $button, size, particleCount, lifespan;
 
 var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 	var model = {
@@ -26,16 +23,16 @@ var modelRun = function( model ){
 		var lifeTime = setInterval(function(){
 			// console.log("Tick.")
 		if( model.lifespan > 0 ){
-			clearPreviousIndex( model, ctx )
+			// clearPreviousIndex( model, ctx )
 			drawModel( step( model ), ctx );
 			model.lifespan --;
 		} else {
 			// console.log("Hit.")
-			clearPreviousIndex( model, ctx );
+			// clearPreviousIndex( model, ctx );
 			clearInterval( lifeTime );
 			model = {};
 		}
-	}, 20)
+	}, 1)
 }
 
 var clearPreviousIndex = function( model, context ){
@@ -70,7 +67,7 @@ var populate = function(num, template){
 	for( var i = 0; i < num; i++ ){
 		template.X = getRange( 0, bottomBoundary );
 		template.Y = getRange( 0, bottomBoundary );
-		template.lifespan = getRange(50, 400);
+		// template.lifespan = 1000
 		template.color = getRandomColor();
 		makeModel(  
 				template.type, 
@@ -98,16 +95,33 @@ window.onload = function(){
 
 canvas = document.querySelector('canvas');
 ctx = canvas.getContext("2d");
-templatePrey = { type: "prey", speed: 1, size: 2, genes: "Sf" };
+
+$genButton = document.querySelector('.generate');
+$clearButton = document.querySelector('.clear')
+
+templatePrey = { type: "prey", lifespan: 400, speed: 1, size: 4, genes: "Sf" };
+populate(40, templatePrey);
+
+$genButton.onclick = function(){
+	size = parseInt( document.querySelector('.size').value );
+	particleCount = parseInt( document.querySelector('.particles').value );
+	lifespan = parseInt( document.querySelector('.lifespan').value );
+	template = { type: "prey", lifespan: lifespan, speed: 1, size: size, genes: "Sf" };
+	populate(particleCount, template);
+}
+
+$clearButton.onclick = function(){
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 // r2 = makeModel( "prey", 9000, 1, 4, 100, 300, "Sf", "blue" );
 // r3 = makeModel( "prey", 9000, 1, 4, 300, 100, "Sf", "yellow" );
 // r4 = makeModel( "prey", 9000, 1, 4, 400, 000, "Sf", "green" );
 // r5 = makeModel( "prey", 9000, 1, 4, 0, 400, "Sf", "purple" );
 // r6 = makeModel( "prey", 9000, 1, 4, 0, 0, "Sf", "pink" );
 // r7 = makeModel( "prey", 9000, 1, 4, 400, 400, "Sf", "orange" );
-// populate(1000, templatePrey)
 
-window.requestAnimationFrame();
+
 
 // drawModel(r1, ctx)
 
