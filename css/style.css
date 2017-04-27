@@ -2,12 +2,20 @@ canvas {
 	border: 1px solid grey;
     padding-left: 0;
     padding-right: 0;
-    margin: 10% 30%;
+    margin: 5% 35%;
     display: block;
 }
 
 .controls {
+	border: 1px solid gainsboro;
+	padding: 16px;
 	float: left;
 	margin-left: 10%;
 	text-align: right;
+}
+
+.controls button {
+width: 35%;
+margin-left: 5%;
+margin-right: 5%;
 }

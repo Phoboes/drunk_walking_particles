@@ -23,7 +23,9 @@ var modelRun = function( model ){
 		var lifeTime = setInterval(function(){
 			// console.log("Tick.")
 		if( model.lifespan > 0 ){
-			// clearPreviousIndex( model, ctx )
+			if( !document.querySelector('.trail').checked ){
+				clearPreviousIndex( model, ctx )
+			}
 			drawModel( step( model ), ctx );
 			model.lifespan --;
 		} else {
@@ -99,8 +101,8 @@ ctx = canvas.getContext("2d");
 $genButton = document.querySelector('.generate');
 $clearButton = document.querySelector('.clear')
 
-templatePrey = { type: "prey", lifespan: 400, speed: 1, size: 4, genes: "Sf" };
-populate(40, templatePrey);
+templatePrey = { type: "prey", lifespan: 600, speed: 1, size: 4, genes: "Sf" };
+populate(50, templatePrey);
 
 $genButton.onclick = function(){
 	size = parseInt( document.querySelector('.size').value );
