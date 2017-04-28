@@ -66,6 +66,9 @@ var populate = function(num, template){
 		template.X = getRange( 0, bottomBoundary );
 		template.Y = getRange( 0, bottomBoundary );
 		}
+		if( rainbow ){
+			template.color = getRandomColor( opacity );
+		}
 	}
 }
 
@@ -130,6 +133,7 @@ var getFormValues = function(){
 	lifespan = parseInt( document.querySelector('.lifespan').value );
 	opacity = parseFloat( document.querySelector('.opacity').value );
 	speed = parseInt( document.querySelector('.speed').value );
+	rainbow = document.querySelector('.rainbow').checked;
 }
 
 window.onload = function(){
