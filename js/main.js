@@ -1,7 +1,8 @@
 var topBoundary = 0;
 var bottomBoundary = 400;
 var cells = new Set();
-var canvas, ctx, $button, size, particleCount, lifespan;
+var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity;
+// clustered = false;
 
 var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 	var model = {
@@ -9,34 +10,15 @@ var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 		speed: speed,
 		size: size,
 		lifespan: lifespan,
+		created_at: Math.floor(Date.now() / 1000),
 		X: x,
 		Y: y,
 		genes: genes,
 		color: color
 	};
-	// debugger
-	// modelRun( model );
 	return model
 };
 
-var modelRun = function( model ){
-		// console.log("run")
-		// var lifeTime = setInterval(function(){
-			// console.log("Tick.")
-		if( model.lifespan > 0 ){
-			if( !document.querySelector('.trail').checked ){
-				clearPreviousIndex( model, ctx )
-			}
-			drawModel( step( model ), ctx );
-			model.lifespan --;
-		} else {
-			// console.log("Hit.")
-			// clearPreviousIndex( model, ctx );
-			// clearInterval( lifeTime );
-			model = {};
-		}
-	// }, 1)
-}
 
 var clearPreviousIndex = function( model, context ){
 	context.clearRect(model.X, model.Y, model.size, model.size);
@@ -60,18 +42,15 @@ var getRange = function( num, range ){
 	return returnVal;
 };
 
-// var step = function( model ){
-// 	model.X = getRange(model.X, model.size);
-// 	model.Y = getRange(model.Y, model.size);
-// 	return model;
-// }
 
 var populate = function(num, template){
 	for( var i = 0; i < num; i++ ){
-		template.X = getRange( 0, bottomBoundary );
-		template.Y = getRange( 0, bottomBoundary );
+		opacity = opacity || 0.1;
+		template.X = template.X || getRange( 0, bottomBoundary );
+		template.Y = template.Y || getRange( 0, bottomBoundary );
 		// template.lifespan = 1000
-		template.color = getRandomColor();
+		console.log(template.lifespan)
+		template.color = template.color || getRandomColor( opacity );
 		c = makeModel(  
 				template.type, 
 				template.lifespan,
@@ -83,34 +62,74 @@ var populate = function(num, template){
 				template.color
 			);
 		cells.add( c );
+		if( !clustered ){
+		template.X = getRange( 0, bottomBoundary );
+		template.Y = getRange( 0, bottomBoundary );
+		}
 	}
 }
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
+function getRandomColor( opacity ) {
+    // var letters = '0123456789ABCDEF';
+    // var color = '#';
+
+    var color = 'rgba( ';
+
+    for (var i = 0; i < 3; i++ ) {
+        color += getRange( 0, 255 ) + ', ';
     }
+
+    color += ( opacity + ' )');
     return color;
 }
 
 var lifeCycle = function(){
+	d = Date.now()
 	cells.forEach( function( model ){
 		// cells.delete(item)
 		// debugger
-		model.lifespan -= 1;
+		// model.lifespan -= 1;
 
-		if( !document.querySelector('.trail').checked ){
+
+		if( clearCells ){
 			clearPreviousIndex( model, ctx )
 		}
-	
+		// debugger
 		//Step
-		model.X = getRange(model.X, model.size);
-		model.Y = getRange(model.Y, model.size);
-		model.lifespan > 0 ? drawModel( model, ctx ) : cells.delete( model );
+		model.X = getRange(model.X, ( model.size * model.speed ));
+		model.Y = getRange(model.Y, ( model.size * model.speed ));
+
+
+		Math.floor( Date.now() / 1000 ) - model.created_at < model.lifespan ? drawModel( model, ctx ) : cells.delete( model );
 	});
+	// console.log("tick")
 	window.requestAnimationFrame( lifeCycle );
+	// debugger
+	// console.log( Date.now() - d );
+	// debugger
+}
+
+// function rectangle(x, y, w, h) {
+
+//     ... existing code here ...
+
+// }
+
+var intersects = function(cellOne, cellTwo) {
+    return !( cellOne.X           > ( cellTwo.X +  cellTwo.size) || 
+             (cellOne.X + cellOne.size) <   cellTwo.X           || 
+              cellOne.Y           > ( cellTwo.Y +  cellTwo.Size) ||
+             (cellOne.Y + cellOne.Size) <   cellTwo.Y);
+}
+
+var getFormValues = function(){
+	clearCells = !document.querySelector('.trail').checked;
+	clustered = document.querySelector('.clustered').checked;
+	size = parseInt( document.querySelector('.size').value );
+	particleCount = parseInt( document.querySelector('.particles').value );
+	lifespan = parseInt( document.querySelector('.lifespan').value );
+	opacity = parseFloat( document.querySelector('.opacity').value );
+	speed = parseInt( document.querySelector('.speed').value );
 }
 
 window.onload = function(){
@@ -121,14 +140,21 @@ ctx = canvas.getContext("2d");
 $genButton = document.querySelector('.generate');
 $clearButton = document.querySelector('.clear')
 
-templatePrey = { type: "prey", lifespan: 1000, speed: 1, size: 4, genes: "Sf" };
-populate(60, templatePrey);
+getFormValues();
+
+// type, lifespan, speed, size, x, y, genes, color
+
+templatePrey = { type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
+populate(5000, templatePrey);
+templatePrey.color = "rgba(50, 50, 50, 0.1)";
+templatePrey.speed = 5;
+populate(2000, templatePrey);
+
+
 
 $genButton.onclick = function(){
-	size = parseInt( document.querySelector('.size').value );
-	particleCount = parseInt( document.querySelector('.particles').value );
-	lifespan = parseInt( document.querySelector('.lifespan').value );
-	template = { type: "prey", lifespan: lifespan, speed: 1, size: size, genes: "Sf" };
+	getFormValues();
+	template = { type: "prey", lifespan: lifespan, speed: speed, size: size, genes: "Sf" };
 	populate(particleCount, template);
 }
 
@@ -141,7 +167,6 @@ $clearButton.onclick = function(){
 
 window.requestAnimationFrame(function(){
 	lifeCycle();
-	console.log("tick")
 });
 
 
