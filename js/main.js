@@ -2,7 +2,6 @@ var topBoundary = 0;
 var bottomBoundary = 400;
 var cells = new Set();
 var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity;
-// clustered = false;
 
 var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 	var model = {
@@ -22,7 +21,7 @@ var makeModel = function( type, lifespan, speed, size, x, y, genes, color ){
 
 var clearPreviousIndex = function( model, context ){
 	context.clearRect(model.X, model.Y, model.size, model.size);
-}
+};
 
 var drawModel = function( model, context ){
 	ctx.fillStyle = model.color
@@ -70,34 +69,25 @@ var populate = function(num, template){
 			template.color = getRandomColor( opacity );
 		}
 	}
-}
+};
 
 function getRandomColor( opacity ) {
-    // var letters = '0123456789ABCDEF';
-    // var color = '#';
-
     var color = 'rgba( ';
-
     for (var i = 0; i < 3; i++ ) {
         color += getRange( 0, 255 ) + ', ';
     }
-
     color += ( opacity + ' )');
     return color;
 }
 
 var lifeCycle = function(){
-	d = Date.now()
+	// d = Date.now()
 	cells.forEach( function( model ){
-		// cells.delete(item)
-		// debugger
-		// model.lifespan -= 1;
-
-
+		// If the 'clear' checkbox is checked - kill the trail as the particle moves.
 		if( clearCells ){
 			clearPreviousIndex( model, ctx )
 		}
-		// debugger
+
 		//Step
 		model.X = getRange(model.X, ( model.size * model.speed ));
 		model.Y = getRange(model.Y, ( model.size * model.speed ));
@@ -105,18 +95,11 @@ var lifeCycle = function(){
 
 		Math.floor( Date.now() / 1000 ) - model.created_at < model.lifespan ? drawModel( model, ctx ) : cells.delete( model );
 	});
-	// console.log("tick")
 	window.requestAnimationFrame( lifeCycle );
-	// debugger
+
 	// console.log( Date.now() - d );
 	// debugger
 }
-
-// function rectangle(x, y, w, h) {
-
-//     ... existing code here ...
-
-// }
 
 var intersects = function(cellOne, cellTwo) {
     return !( cellOne.X           > ( cellTwo.X +  cellTwo.size) || 
@@ -125,7 +108,13 @@ var intersects = function(cellOne, cellTwo) {
              (cellOne.Y + cellOne.Size) <   cellTwo.Y);
 }
 
-var getFormValues = function(){
+var getDomValues = function(){
+
+	canvas = document.querySelector('canvas');
+	ctx = canvas.getContext("2d");
+	$genButton = document.querySelector('.generate');
+	$clearButton = document.querySelector('.clear')
+
 	clearCells = !document.querySelector('.trail').checked;
 	clustered = document.querySelector('.clustered').checked;
 	size = parseInt( document.querySelector('.size').value );
@@ -137,55 +126,25 @@ var getFormValues = function(){
 }
 
 window.onload = function(){
+	getDomValues();
 
-canvas = document.querySelector('canvas');
-ctx = canvas.getContext("2d");
+	templatePrey = { type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
+	populate(5000, templatePrey);
+	templatePrey.color = "rgba(50, 50, 50, 0.1)";
+	templatePrey.speed = 5;
+	populate(2000, templatePrey);
 
-$genButton = document.querySelector('.generate');
-$clearButton = document.querySelector('.clear')
+	$genButton.onclick = function(){
+		getDomValues();
+		template = { type: "prey", lifespan: lifespan, speed: speed, size: size, genes: "Sf" };
+		populate(particleCount, template);
+	}
 
-getFormValues();
+	$clearButton.onclick = function(){
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	}
 
-// type, lifespan, speed, size, x, y, genes, color
-
-templatePrey = { type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
-populate(5000, templatePrey);
-templatePrey.color = "rgba(50, 50, 50, 0.1)";
-templatePrey.speed = 5;
-populate(2000, templatePrey);
-
-
-
-$genButton.onclick = function(){
-	getFormValues();
-	template = { type: "prey", lifespan: lifespan, speed: speed, size: size, genes: "Sf" };
-	populate(particleCount, template);
-}
-
-$clearButton.onclick = function(){
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-}
-
-
-window.requestAnimationFrame(function(){
-	lifeCycle();
-});
-
-
-
-// debugger
-
-// r2 = makeModel( "prey", 9000, 1, 4, 100, 300, "Sf", "blue" );
-// r3 = makeModel( "prey", 9000, 1, 4, 300, 100, "Sf", "yellow" );
-// r4 = makeModel( "prey", 9000, 1, 4, 400, 000, "Sf", "green" );
-// r5 = makeModel( "prey", 9000, 1, 4, 0, 400, "Sf", "purple" );
-// r6 = makeModel( "prey", 9000, 1, 4, 0, 0, "Sf", "pink" );
-// r7 = makeModel( "prey", 9000, 1, 4, 400, 400, "Sf", "orange" );
-
-
-
-// drawModel(r1, ctx)
-
+	window.requestAnimationFrame(function(){
+		lifeCycle();
+	});
 };
