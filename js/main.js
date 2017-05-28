@@ -92,7 +92,7 @@ var breed = function(model1, model2) {
     // debugger
 
     if( colorInheritance ){ 
-      debugger
+      // debugger
       child.color = model1.color
     } else {
       child.color = getRandomColor(opacity)
