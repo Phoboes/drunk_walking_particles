@@ -1,8 +1,17 @@
 var topBoundary = 0;
-var bottomBoundary = 400;
+var bottomBoundary;
 var cells = [];
 var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity, $input, cellType, breeding, colorInheritance;
 var nextGeneration;
+
+var genCanvas = function(){
+  var $canvas = document.createElement('canvas');
+  $canvas.width = window.innerWidth;
+  $canvas.height = window.innerHeight;
+  bottomBoundary = $canvas.height;
+  document.body.appendChild( $canvas );
+}
+
 
 var makeModel = function(type, lifespan, speed, size, x, y, genes, color) {
   var model = {
@@ -10,12 +19,15 @@ var makeModel = function(type, lifespan, speed, size, x, y, genes, color) {
     speed: speed,
     size: size,
     lifespan: lifespan,
+    lifeRemaining: lifespan,
+    timesSinceLastFed: Date.now(),
     timesSinceLastBred: Date.now(),
     createdAt: Math.floor(Date.now() / 1000),
     X: x,
     Y: y,
     genes: genes,
-    color: color
+    color: color,
+    hue: 0
   };
   return model
 };
@@ -26,32 +38,47 @@ var clearPreviousIndex = function(model, context) {
 };
 
 var drawModel = function(model, context) {
-  ctx.fillStyle = model.color
+  ctx.fillStyle = model.color;
+  // ctx.fillStyle = 'hsla(' + model.hue + ", 100%, 50%, " + opacity + ")";
   context.fillRect(model.X, model.Y, model.size, model.size);
 };
 
 
-var getRange = function(num, range) {
-  var returnVal = Math.round(Math.random() * ((num + range) - (num - range))) + (num - range);
-  // If canvas bounds are exceeded -- reroll
-  while (returnVal > bottomBoundary || returnVal < topBoundary) {
-    var next = getRange(num, range);
-    if (next) {
-      return next;
-    }
-  }
-  return returnVal;
+var getRange = function(num, range, model) {
+  // debugger
+  // var returnVal;
+
+  // // If a model has been passed to the range generator
+  // if( model ){
+  //   // If canvas bounds are exceeded -- reroll
+  //     var largestVal = canvas.width > canvas.height ? canvas.width : canvas.height;
+  //     returnVal = Math.abs( Math.round(Math.random() * ((num + largestVal) - (num - largestVal))) + (num - largestVal) );
+  //   while (
+  //     model.X < 0 && model.X > canvas.width ||
+  //     model.Y < 0 && model.Y > canvas.height
+  //   ) {
+  //     var next = getRange(num, largestVal);
+  //     if ( next ) {
+  //       return next;
+  //     }
+  //   }
+  //   // return 
+  // } else {
+  //   // debugger
+    return Math.abs( Math.round(Math.random() * ((num + range) - (num - range))) + (num - range) );
+  // }
+  // return returnVal;
 };
 
 
 var populate = function(num, template) {
   for (var i = 0; i < num; i++) {
     opacity = opacity || 0.1;
-    template.X = template.X || getRange(0, bottomBoundary);
-    template.Y = template.Y || getRange(0, bottomBoundary);
-    // template.lifespan = 1000
-    // console.log(template.lifespan)
+    template.X = template.X || getRange(0, canvas.width, template);
+    template.Y = template.Y || getRange(0, canvas.height, template);
+    console.log( template.X, " and ", template.Y )
     template.color = template.color || getRandomColor(opacity);
+    template.type = template.type || "prey";
     c = makeModel(
       template.type,
       template.lifespan,
@@ -64,8 +91,8 @@ var populate = function(num, template) {
     );
     cells.push(c);
     if (!clustered) {
-      template.X = getRange(0, bottomBoundary);
-      template.Y = getRange(0, bottomBoundary);
+      template.X = getRange(0, bottomBoundary, true);
+      template.Y = getRange(0, bottomBoundary, true);
     }
     if (rainbow) {
       template.color = getRandomColor(opacity);
@@ -87,11 +114,13 @@ var breed = function(model1, model2) {
 
               // console.log("contact")
     // type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)"
+    var maxX = getRange( 1, canvas.width );
+    var maxY = getRange( 1, canvas.height )
 
-    var child = makeModel(model1.type, model1.lifespan, model1.speed, model1.size, getRange(1, bottomBoundary), getRange(1, bottomBoundary), model1.genes);
+    var child = makeModel(model1.type, model1.lifespan, model1.speed, model1.size, maxX, maxY, model1.genes);
     // debugger
 
-    if( colorInheritance ){ 
+    if( colorInheritance ){
       // debugger
       child.color = model1.color
     } else {
@@ -102,37 +131,16 @@ var breed = function(model1, model2) {
 }
 
 var lifeCycle = function() {
-  // d = Date.now()
-
-  //TODO - Split breed to a new function
-  // Age sort to front - If the model is dead, just nuke & ignore it
-  // Prey/predator => set prey life to 0 and predator lifespan to now
-  // Ideally kill prey and never iterate it.
-  // Split breed to type intersections => if types are ===
-
-    // if( cells.length <= 0 ){
-    //  return
-    // }
-    nextGeneration = [];
-
-  // if( cells.length === 0 ){
-  //   console.log( "No cells found." )
-  // }
-
+  nextGeneration = [];
   if (cells.length > 0) {
-    // debugger
-      for (var i = 0; i < cells.length; i++) {
-        // If the 'clear' checkbox is checked - kill the trail as the particle moves.
-        model = cells[i]
-
-
-
-    if (cells.length > 0) {
-    if (Math.floor(Date.now() / 1000) - model.createdAt < model.lifespan && nextGeneration.indexOf( model ) < 0 ) {
+    for (var i = 0; i < cells.length; i++) {
+      model = cells[i];
+      if (cells.length > 0) {
+    if (Math.floor(Date.now() / 1000) - model.createdAt < model.lifeRemaining && nextGeneration.indexOf( model ) < 0 ) {
       nextGeneration.push(model);
-    if( breeding ){  
+    if( breeding ){
       var sinceLastSpawn = (Date.now() - model.timesSinceLastBred) / 10;
-        if (sinceLastSpawn > model.lifespan * 100 / 10) {
+        if (sinceLastSpawn > model.lifeRemaining * 100 / 10) {
 
           var genLength = cells.length;
 
@@ -143,18 +151,23 @@ var lifeCycle = function() {
             // console.log( j )
             if (intersects(model, cells[j]) &&
 
-              (Date.now() - cells[j].timesSinceLastBred / 10) > cells[j].lifespan * 100 / 10) {
+              (Date.now() - cells[j].timesSinceLastBred / 10) > cells[j].lifeRemaining * 100 / 10) {
                             // console.log("contact")
 
               if( model.type === cells[j].type ){
                 nextGeneration.push( breed( model, nextGeneration[j]) );
-                model.timesSinceLastBred = Date.now() + model.lifespan * 1000 / 10;
+                model.timesSinceLastBred = Date.now() + model.lifeRemaining * 1000 / 10;
                 cells[j].timesSinceLastBred = Date.now() + cells[j] * 1000 / 10;
               } else {
                 // debugger
-                model.type === "predator" ? model.lifespan = Math.floor(Date.now() / 1000) : cells[j].lifespan = 0;
-                var prey = model.type === "prey" ? cells[j].lifespan = 0 : model.lifespan = Math.floor(Date.now() / 1000);
-              }
+                if(model.type === "predator"){
+                  model.createdAt = Math.floor(Date.now() / 1000);
+                  cells[j].lifeRemaining = 0;
+                } else {
+                  model.lifeRemaining = 0;
+                  cells[j].createdAt = Math.floor(Date.now() / 1000);
+                }
+              };
 
             }
 
@@ -171,6 +184,7 @@ var lifeCycle = function() {
         model.X = getRange(model.X, (model.size * model.speed));
         model.Y = getRange(model.Y, (model.size * model.speed));
 
+        // model.hue ++;
         drawModel(model, ctx);
 
     } else {
@@ -187,9 +201,9 @@ var lifeCycle = function() {
           // debugger
               // debugger
 
-        
+
       };
-    } 
+    }
     // console.log( cells )
     // console.log( nextGeneration )
       // if (nextGeneration.length === 0 && i === cells.length) {
@@ -210,11 +224,19 @@ var lifeCycle = function() {
 
 
 var intersects = function(cellOne, cellTwo) {
-  return !(cellOne.X > (cellTwo.X + cellTwo.size) ||
-    (cellOne.X + cellOne.size) < cellTwo.X ||
-    cellOne.Y > (cellTwo.Y + cellTwo.Size) ||
-    (cellOne.Y + cellOne.Size) < cellTwo.Y);
+  return !(cellTwo.X > cellOne.X + cellOne.size ||
+           cellTwo.X + cellOne.size < cellOne.X ||
+           cellTwo.Y > cellOne.Y + cellOne.size ||
+           cellTwo.Y + cellOne.size < cellOne.Y);
 }
+
+
+  // intersection: function( head, item ) {
+  //   return !(item.x > head.x + app.snake.body.size - 1 ||
+  //            item.x + app.snake.body.size - 1 < head.x ||
+  //            item.y > head.y + app.snake.body.size - 1 ||
+  //            item.y + app.snake.body.size - 1 < head.y);
+  // },
 
 var getDomValues = function() {
 
@@ -239,12 +261,13 @@ var getDomValues = function() {
 }
 
 window.onload = function() {
+  genCanvas();
   getDomValues();
 
-    // template1 = { type: "prey", lifespan: 20, speed: speed, size: size, genes: "Sf", color: "rgba(255,0,0,0.5)" };
-    // template2 = { type: "predator", lifespan: 5, speed: speed, size: size, genes: "Sf", color: "rgba(0,0,255, 0.5)" };
-    // populate(5, template1);
-    // populate(20, template2);
+    template1 = { type: "prey", lifespan: 20, speed: speed, size: 2, genes: "Sf", color: "rgba( 200, 0, 30, 0.1 )" };
+    template2 = { type: "predator", lifespan: 20, speed: speed, size: 3, genes: "Sf", color: "rgba( 0, 255, 0, 0.1 )" };
+    populate(1000, template1);
+    populate(70, template2);
 
 
   // templatePrey = { type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
