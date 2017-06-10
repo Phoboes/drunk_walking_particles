@@ -10,7 +10,8 @@
   <body>
 
   <div class="container">
-      <div class="controls">
+      <div class="controlWrap">
+        <div class="controls hidden">
         <p>
           <label for="">Size</label>
           <input class="size" value="2" type="text">
@@ -21,7 +22,7 @@
         </p>
         <p>
           <label for="">Lifespan</label>
-          <input class="lifespan" value="5" type="text">
+          <input class="lifespan" value="10" type="text">
         </p>
         <p>
           <label for="">Speed</label>
@@ -35,23 +36,33 @@
           <label for="">Predatory cell</label>
           <input class="cellType" checked ="true" type="checkbox">
         </p>
-        <p>
-          <label for="">Breeding behavior</label>
-          <input class="breeding" checked ="true" type="checkbox">
-          <label for="">Inherit color</label>
-          <input class="inheritCol" checked ="true" type="checkbox">
+
+        <div class="checkboxes">
+          <p>
+            <label for="">Breeding behavior</label>
+            <input class="breeding" type="checkbox">
+            <label for="">Inherit color</label>
+            <input class="inheritCol" checked ="true" type="checkbox">
+          </p>
+          <p>
+            <label for="">Trailing</label>
+            <input type="checkbox" checked="true" class="trail"></input>
+            <label for="">Clustered</label>
+            <input type="checkbox" checked ="true" class="clustered"></input>
+            <label for="">Rainbow</label>
+            <input type="checkbox" class="rainbow"></input>
+        </div>
+
         </p>
-        <p>
-          <label for="">Trailing</label>
-          <input type="checkbox" checked="true" class="trail"></input>
-          <label for="">Clustered</label>
-          <input type="checkbox" class="clustered"></input>
-          <label for="">Rainbow</label>
-          <input type="checkbox" class="rainbow"></input>
-        </p>
-        <button class="generate">Generate</button><button class="clear">Clear</button>
+        <div class="buttonWrap">
+          <button class="generate">Generate</button>
+          <button class="clear">Clear</button>
+          <button class="killSwitch">Kill</button>
+        </div>
       </div>
-      <canvas width="400", height="400" ></canvas>
+      <div class="toggle arrowDown"></div>
+      </div>
+      <!-- <canvas width="1000", height="1000" ></canvas> -->
   </div>
   </body>
   </html>
