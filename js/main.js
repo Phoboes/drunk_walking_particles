@@ -1,7 +1,7 @@
 var topBoundary = 0;
 var bottomBoundary;
 var cells = [];
-var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity, $input, cellType, breeding, colorInheritance;
+var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity, $input, $toggle, cellType, breeding, colorInheritance;
 var nextGeneration;
 
 var genCanvas = function(){
@@ -31,7 +31,6 @@ var makeModel = function(type, lifespan, speed, size, x, y, genes, color) {
   };
   return model
 };
-
 
 var clearPreviousIndex = function(model, context) {
   context.clearRect(model.X, model.Y, model.size, model.size);
@@ -76,7 +75,7 @@ var populate = function(num, template) {
     opacity = opacity || 0.1;
     template.X = template.X || getRange(0, canvas.width, template);
     template.Y = template.Y || getRange(0, canvas.height, template);
-    console.log( template.X, " and ", template.Y )
+    // console.log( template.X, " and ", template.Y )
     template.color = template.color || getRandomColor(opacity);
     template.type = template.type || "prey";
     c = makeModel(
@@ -245,6 +244,7 @@ var getDomValues = function() {
   $genButton = document.querySelector('.generate');
   $clearButton = document.querySelector('.clear');
   $input = document.querySelector('input');
+  $toggle = document.querySelector('.toggle');
 
   clearCells = !document.querySelector('.trail').checked;
   clustered = document.querySelector('.clustered').checked;
@@ -264,35 +264,44 @@ window.onload = function() {
   genCanvas();
   getDomValues();
 
-    template1 = { type: "prey", lifespan: 20, speed: speed, size: 2, genes: "Sf", color: "rgba( 200, 0, 30, 0.1 )" };
-    template2 = { type: "predator", lifespan: 20, speed: speed, size: 3, genes: "Sf", color: "rgba( 0, 255, 0, 0.1 )" };
-    populate(1000, template1);
-    populate(70, template2);
+    // template1 = { type: "prey", lifespan: 20, speed: speed, size: 2, genes: "Sf", color: "rgba( 200, 0, 30, 0.4 )" };
+    // template2 = { type: "predator", lifespan: 20, speed: speed, size: 3, genes: "Sf", color: "rgba( 0, 255, 0, 0.4 )" };
+    // populate(70, template2);
+    // populate(1000, template1);
 
 
-  // templatePrey = { type: "prey", lifespan: 4, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
-  // populate(5000, templatePrey);
-  // templatePrey.color = "rgba(50, 50, 50, 0.1)";
-  // templatePrey.speed = 5;
-  // populate(2000, templatePrey);
+  templatePrey = { type: "prey", lifespan: 7, speed: 1, size: 2, X: 200, Y: 200, genes: "Sf", color: "rgba(255, 255, 255, 0.1)" };
+  populate(5000, templatePrey);
+  templatePrey.color = "rgba(50, 50, 50, 0.1)";
+  templatePrey.speed = 5;
+  populate(2000, templatePrey);
 
   $genButton.onclick = function() {
     getDomValues();
     // debugger
     template = { type: cellType, lifespan: lifespan, speed: speed, size: size, genes: "Sf" };
     populate(particleCount, template);
-  }
+  };
 
   $input.onclick = function() {
     getDomValues();
     lifeCycle();
-  }
+  };
+
+
+  $toggle.onclick = function(){
+    document.querySelector('.controls').classList.toggle('hidden');
+    this.classList.toggle('arrowUp');
+    this.classList.toggle('arrowDown');
+    
+  };
 
   $clearButton.onclick = function() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  };
 
   window.requestAnimationFrame(function() {
     lifeCycle();
   });
 };
+
