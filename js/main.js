@@ -1,8 +1,9 @@
 var topBoundary = 0;
 var bottomBoundary;
 var cells = [];
-var canvas, ctx, $genButton, $clearButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity, $input, $toggle, cellType, breeding, colorInheritance;
+var canvas, ctx, $genButton, $clearButton, $killButton, size, particleCount, lifespan, speed, clustered, clearCells, opacity, $input, $toggle, cellType, breeding, colorInheritance;
 var nextGeneration;
+var kill = false;
 
 var genCanvas = function(){
   var $canvas = document.createElement('canvas');
@@ -11,7 +12,6 @@ var genCanvas = function(){
   bottomBoundary = $canvas.height;
   document.body.appendChild( $canvas );
 }
-
 
 var makeModel = function(type, lifespan, speed, size, x, y, genes, color) {
   var model = {
@@ -40,7 +40,6 @@ var drawModel = function(model, context) {
   // ctx.fillStyle = 'hsla(' + model.hue + ", 100%, 50%, " + opacity + ")";
   context.fillRect(model.X, model.Y, model.size, model.size);
 };
-
 
 var getRange = function(num, range, model) {
     return Math.abs( Math.round(Math.random() * ((num + range) - (num - range))) + (num - range) );
@@ -105,7 +104,7 @@ var breed = function(model1, model2) {
 var lifeCycle = function() {
   nextGeneration = [];
   if (cells.length > 0) {
-    for (var i = 0; i < cells.length; i++) {
+    for (var i = 0; i < cells.length && !kill; i++) {
       model = cells[i];
 
       if( model.type == "predator" && model.timesSinceLastFed - ( Date.now() / 1000 ) > model.lifespan / 4 ){
@@ -182,6 +181,7 @@ var getDomValues = function() {
   $clearButton = document.querySelector('.clear');
   $input = document.querySelector('input');
   $toggle = document.querySelector('.toggle');
+  $killButton = document.querySelector('.killSwitch');
 
   clearCells = !document.querySelector('.trail').checked;
   clustered = document.querySelector('.clustered').checked;
@@ -229,6 +229,10 @@ window.onload = function() {
     this.classList.toggle('arrowUp');
     this.classList.toggle('arrowDown');
     
+  };
+
+  $killButton.onclick = function(){
+    kill === true ? kill = false : kill = true;
   };
 
   $clearButton.onclick = function() {
